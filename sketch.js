@@ -1,19 +1,19 @@
 let backgroundImg;
 let eggsImg, breadImg, juiceImg, milkImg, listImg, candyImg, yoohooImg, cheeseitImg, macImg, footImg, shoppingImg, basketImg, tortillaImg, baconImg, tomatoImg, lettuceImg;
-let eggs, bread, juice, milk, cart, list, candy, yoohoo, cheeseit, mac, foot, shopping, tortilla, bacon, tomato, lettuce;
+let eggs, bread, juice, milk, candy, yoohoo, cheeseit, mac, foot, tortilla, bacon, tomato, lettuce;
 let showLoadingScreen = true;
 let showRecipeScreen = false;
-let gravityForce = 1; 
+let gravityForce =2; 
 let sprites = [];
 let totalCost = 0;
 let beepSound;
-let lastMessage = ""; 
-let messageTimer = 0; 
-const MESSAGE_DURATION = 3000; 
+let lastMessage = "";
+let messageTimer = 0;
+const MESSAGE_DURATION = 3000;
 
 function preload() {
   loadScreenImg = loadImage("assets/supermarket.png");
-  recipeScreenImg = loadImage("assets/recipe.png"); 
+  recipeScreenImg = loadImage("assets/recipe.png");
   eggsImg = loadImage("assets/eggs.png");
   breadImg = loadImage("assets/bread.png");
   juiceImg = loadImage("assets/juice.png");
@@ -30,8 +30,8 @@ function preload() {
   listImg = loadImage("assets/list.png");
   backgroundImg = loadImage("assets/shelves.png");
   shoppingImg = loadImage("assets/shopping.png");
-  basketImg = loadImage("assets/basket.png"); 
-  beepSound = loadSound("assets/beep.mp3"); 
+  basketImg = loadImage("assets/basket.png");
+  beepSound = loadSound("assets/beep.mp3");
 }
 
 function setup() {
@@ -41,11 +41,11 @@ function setup() {
   canvas.addEventListener("click", () => {
     if (showLoadingScreen) {
       showLoadingScreen = false;
-      showRecipeScreen = true; 
+      showRecipeScreen = true;
       return;
     }
     if (showRecipeScreen) {
-      showRecipeScreen = false; 
+      showRecipeScreen = false;
       initializeSprites();
     }
   });
@@ -67,7 +67,6 @@ function initializeSprites() {
   lettuce = createSpriteObject(lettuceImg, 500, 980, 4.75);
 
   sprites = [eggs, bread, juice, milk, candy, yoohoo, cheeseit, mac, foot, tortilla, bacon, tomato, lettuce];
-  list = listImg;
 }
 
 function createSpriteObject(img, x, y, value) {
@@ -75,8 +74,8 @@ function createSpriteObject(img, x, y, value) {
   sprite.img = img;
   sprite.position.set(x, y);
   sprite.drag = 10;
-  sprite.value = value; 
-  sprite.counted = false; 
+  sprite.value = value;
+  sprite.counted = false;
   return sprite;
 }
 
@@ -93,40 +92,41 @@ function draw() {
 
   clear();
   image(backgroundImg, 0, 0);
-  image(list, 1300, 270, 700, 1000);
-  image(shoppingImg, width - 460, 0, 400, height); 
-  
-  for (let sprite of sprites) {
-    sprite.rotation = 0; 
+  image(listImg, 1300, 270, 700, 1000);
+  image(shoppingImg, width - 460, 0, 400, height);
 
+  for (let sprite of sprites) {
+    sprite.rotation = 0;
     if (sprite.mouse.dragging()) {
       sprite.moveTowards(mouseX, mouseY, 1);
     }
-    applyGravityAndCheckMessages(sprite);
+    applyGravityAndCheckCart(sprite);
+    sprite.draw();
   }
 
- 
   image(basketImg, width - 460, 0, 400, height);
 
- 
+  
   fill("white");
   textSize(40);
   textAlign(CENTER, TOP);
   text(`Total: $${totalCost.toFixed(2)}`, width - 260, 20);
 
+ 
   if (millis() - messageTimer < MESSAGE_DURATION && lastMessage !== "") {
     fill("white");
     textSize(50);
     textAlign(CENTER, TOP);
-    text(lastMessage, 640, 1500);
+    text(lastMessage, width / 2, height - 150);
   }
 }
 
-function applyGravityAndCheckMessages(sprite) {
-  let rectX = width - 460; 
-  let rectWidth = 400; 
-  let rectY = 0; 
-  let rectHeight = height; 
+function applyGravityAndCheckCart(sprite) {
+  const rectX = width - 460;
+  const rectWidth = 400;
+  const rectY = 0;
+  const rectHeight = height;
+  const platformY = rectHeight - 100; 
 
   if (
     sprite.x > rectX &&
@@ -138,24 +138,26 @@ function applyGravityAndCheckMessages(sprite) {
 
     if (!sprite.mouse.dragging()) {
       sprite.y += gravityForce;
-      gravityForce = min(gravityForce + 90, 50); 
+
+     
+      if (sprite.y > platformY) {
+        sprite.y = platformY;
+        gravityForce = 0;
+      } else {
+        gravityForce = min(gravityForce + 1, 50); 
+      }
     }
 
     if (!sprite.counted) {
       totalCost += sprite.value;
-      sprite.counted = true; 
-      if (beepSound.isLoaded()) beepSound.play(); 
-  } else {
-    
-    if (sprite.counted) {
-      totalCost -= sprite.value;
-      sprite.counted = false; 
+      sprite.counted = true;
+      if (beepSound.isLoaded()) beepSound.play();
     }
-    gravityForce = 7;
+  } else {
+    sprite.counted = false; 
+    gravityForce = 2; 
   }
 }
-
-
 
 function displayMessages(sprite) {
   let message = "";
@@ -166,16 +168,16 @@ function displayMessages(sprite) {
   if (sprite === bread) message = "That is going to get moldy!";
   if (sprite === candy) message = "A sweet treat...? :)";
   if (sprite === yoohoo) message = "ooo that looks good";
-  if (sprite === cheeseit) message = "what an economic snack";
-  if (sprite === mac) message = "I love annies!";
-  if (sprite === foot) message = "great choice";
+  if (sprite === cheeseit) message = "What an economic snack!";
+  if (sprite === mac) message = "I love Annie's!";
+  if (sprite === foot) message = "Great choice!";
   if (sprite === tortilla) message = "That's a little pricey for tortillas!";
   if (sprite === bacon) message = "You're never finishing all of that!";
   if (sprite === tomato) message = "Those are going to go bad before you use them.";
-  if (sprite === lettuce) message = "Yea, you don't want to wash, cut, and prepare all that.";
+  if (sprite === lettuce) message = "You don't want to wash and prepare all that.";
 
   if (lastMessage !== message) {
     lastMessage = message;
     messageTimer = millis();
   }
-}}
+}
