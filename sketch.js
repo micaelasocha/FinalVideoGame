@@ -155,6 +155,8 @@ function applyGravityAndCheckMessages(sprite) {
   }
 }
 
+
+
 function displayMessages(sprite) {
   let message = "";
 
@@ -162,11 +164,11 @@ function displayMessages(sprite) {
   if (sprite === milk) message = "You won't drink all that!";
   if (sprite === juice) message = "That's a waste of money!";
   if (sprite === bread) message = "That is going to get moldy!";
-  if (sprite === candy) message = "A sweet treat?";
-  if (sprite === yoohoo) message = "Chocolate... drink?";
-  if (sprite === cheeseit) message = "How is that SO orange???";
-  if (sprite === mac) message = "Orange Boxed pasta?";
-  if (sprite === foot) message = "Fruit by the what?";
+  if (sprite === candy) message = "A sweet treat...? :)";
+  if (sprite === yoohoo) message = "ooo that looks good";
+  if (sprite === cheeseit) message = "what an economic snack";
+  if (sprite === mac) message = "I love annies!";
+  if (sprite === foot) message = "great choice";
   if (sprite === tortilla) message = "That's a little pricey for tortillas!";
   if (sprite === bacon) message = "You're never finishing all of that!";
   if (sprite === tomato) message = "Those are going to go bad before you use them.";
