@@ -32,7 +32,6 @@ function preload() {
   baconImg = loadImage("assets/bacon.png");
   tomatoImg = loadImage("assets/tomato.png");
   lettuceImg = loadImage("assets/lettuce.png");
-  listImg = loadImage("assets/list.png");
   backgroundImg = loadImage("assets/shelves.png");
   shoppingImg = loadImage("assets/shopping.png");
   basketImg = loadImage("assets/basket.png");
