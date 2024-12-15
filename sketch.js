@@ -1,23 +1,20 @@
 let backgroundImg;
-let eggsImg, breadImg, juiceImg, milkImg, listImg, candyImg, yoohooImg, cheeseitImg, macImg, footImg, shoppingImg, basketImg, tortillaImg, baconImg, tomatoImg, lettuceImg;
+let eggsImg, breadImg, juiceImg, milkImg, candyImg, yoohooImg, cheeseitImg, macImg, footImg, shoppingImg, basketImg, tortillaImg, baconImg, tomatoImg, lettuceImg;
 let eggs, bread, juice, milk, candy, yoohoo, cheeseit, mac, foot, tortilla, bacon, tomato, lettuce;
 let showLoadingScreen = true;
 let showRecipeScreen = false;
 let gravityForce = 7;
 let sprites = [];
 let totalCost = 0;
-let beepSound;
+let beepSound, crunchSound;
 let lastMessage = "";
 let messageTimer = 0;
 const MESSAGE_DURATION = 3000;
-let newImage, loseImage;  // Declare the lose image
-let showNewImageFlag = false;
-let showLoseImageFlag = false;  // Flag to control the lose image display
+let loseImages = [];
+let loseImageIndex = 0;
+let showLoseImageFlag = false;
 
-let buttonX, buttonY, buttonWidth, buttonHeight;  // For the clickable rectangle
-
-let loseScreenIndex = 1;  // Variable to track the current lose screen
-let totalLoseScreens = 25;  // Total number of lose screens
+let buttonX, buttonY, buttonWidth, buttonHeight; 
 
 function preload() {
   loadScreenImg = loadImage("assets/supermarket.png");
@@ -40,14 +37,19 @@ function preload() {
   shoppingImg = loadImage("assets/shopping.png");
   basketImg = loadImage("assets/basket.png");
   beepSound = loadSound("assets/beep.mp3");
-  newImage = loadImage("assets/newImage.png");  // Load the new image
+  crunchSound = loadSound("assets/crunch.mp3");
+
+
+  for (let i = 1; i <= 25; i++) {
+    loseImages.push(loadImage(`assets/lose${i}.png`));
+  }
 }
 
 function setup() {
   createCanvas(2400, 1600);
   image(loadScreenImg, 0, 0, width, height);
 
-  // Initialize button position and size
+
   buttonX = 1495;
   buttonY = 1355;
   buttonWidth = 400;
@@ -56,71 +58,50 @@ function setup() {
 
 function mousePressed() {
   if (showLoseImageFlag) {
-    // Prevent further actions if the lose image is shown
+    if (loseImageIndex < loseImages.length - 1) {
+      loseImageIndex++;
+      if (crunchSound.isLoaded()) {
+    
+        let crunchInstance = crunchSound.play();
+      }
+    }
     return;
   }
 
   if (showLoadingScreen) {
     showLoadingScreen = false;
     showRecipeScreen = true;
-    image(recipeScreenImg, 0, 0, width, height);  // Show the recipe screen immediately after loading
+    image(recipeScreenImg, 0, 0, width, height);
   } else if (showRecipeScreen) {
     showRecipeScreen = false;
-    initializeSprites(); // Initialize sprites once the recipe screen is done
-  } else {
-    // Check if the click is within the bounds of the checkout button
-    if (
-      mouseX > buttonX &&
-      mouseX < buttonX + buttonWidth &&
-      mouseY > buttonY &&
-      mouseY < buttonY + buttonHeight
-    ) {
-      // Show lose image when the checkout button is clicked
-      showLoseImage();  // Call the function to show the lose image
-    }
-  }
-}
-
-
-// Function to show the current lose image based on the loseScreenIndex
-function showLoseImage() {
-  showLoseImageFlag = true;  // Set the flag to show the lose image
-
-  // Dynamically load the lose image based on the current index
-  let loseImagePath = `assets/lose${loseScreenIndex}.png`;  // Construct the path for the current lose image
-  loseImage = loadImage(loseImagePath, () => {
-    // Image loaded successfully
-    console.log(`Loaded ${loseImagePath}`);
-  }, () => {
-    // Error loading image (if the image does not exist)
-    console.log(`Failed to load ${loseImagePath}`);
-  });
-
-  // Increment the lose screen index, and reset it if it exceeds the total number of screens
-  loseScreenIndex++;
-  if (loseScreenIndex > totalLoseScreens) {
-    loseScreenIndex = 1;  // Reset to the first lose screen
+    initializeSprites();
+  } else if (
+    mouseX >= buttonX &&
+    mouseX <= buttonX + buttonWidth &&
+    mouseY >= buttonY &&
+    mouseY <= buttonY + buttonHeight
+  ) {
+    showLoseImage();
   }
 }
 
 function initializeSprites() {
   eggs = createSpriteObject(eggsImg, 200, 280, 2.75);
-  bread = createSpriteObject(breadImg, 200, 1300, 3.50);
+  bread = createSpriteObject(breadImg, 200, 1300, 3.5);
   juice = createSpriteObject(juiceImg, 200, 955, 4.25);
-  milk = createSpriteObject(milkImg, 200, 610, 2.00);
+  milk = createSpriteObject(milkImg, 200, 610, 2.0);
   candy = createSpriteObject(candyImg, 490, 630, 1.95);
-  yoohoo = createSpriteObject(yoohooImg, 690, 250, 1.00);
+  yoohoo = createSpriteObject(yoohooImg, 690, 250, 1.0);
   cheeseit = createSpriteObject(cheeseitImg, 490, 260, 3.85);
   mac = createSpriteObject(macImg, 870, 250, 1.85);
   foot = createSpriteObject(footImg, 1090, 260, 2.35);
-  tortilla = createSpriteObject(tortillaImg, 810, 600, 6.50);
-  bacon = createSpriteObject(baconImg, 610, 1270, 10.00);
-  tomato = createSpriteObject(tomatoImg, 900, 980, 3.00);
+  tortilla = createSpriteObject(tortillaImg, 810, 600, 6.5);
+  bacon = createSpriteObject(baconImg, 610, 1270, 10.0);
+  tomato = createSpriteObject(tomatoImg, 900, 980, 3.0);
   lettuce = createSpriteObject(lettuceImg, 500, 980, 4.75);
 
   sprites = [eggs, bread, juice, milk, candy, yoohoo, cheeseit, mac, foot, tortilla, bacon, tomato, lettuce];
 
-  // Store the original positions
   for (let sprite of sprites) {
     sprite.originalX = sprite.position.x;
     sprite.originalY = sprite.position.y;
@@ -134,20 +115,17 @@ function createSpriteObject(img, x, y, value) {
   sprite.drag = 10;
   sprite.value = value;
   sprite.counted = false;
-
-  // Store the initial position
   sprite.originalX = x;
   sprite.originalY = y;
-
   return sprite;
 }
 
 function resetSprites() {
   for (let sprite of sprites) {
-    sprite.position.set(sprite.originalX, sprite.originalY); // Reset position
-    sprite.counted = false; // Reset the counted state
+    sprite.position.set(sprite.originalX, sprite.originalY);
+    sprite.counted = false;
   }
-  totalCost = 0; // Reset the total cost
+  totalCost = 0;
 }
 
 function draw() {
@@ -161,11 +139,21 @@ function draw() {
     return;
   }
 
-  clear();
-  image(backgroundImg, 0, 0);  // Draw the background
-  image(shoppingImg, width - 460, 0, 400, height);  // Draw the shopping image
+  if (showLoseImageFlag) {
+    image(loseImages[loseImageIndex], 0, 0, width, height);
+    if (loseImageIndex === 0) {
+      fill('black'); 
+      textSize(100);
+      textAlign(CENTER, CENTER);
+      text("CLICK", width / 2, height / 2 + 500); 
+    }
+    return;
+  }
 
-  // Draw the sprites after the background
+  clear();
+  image(backgroundImg, 0, 0);
+  image(shoppingImg, width - 460, 0, 400, height);
+
   for (let sprite of sprites) {
     sprite.rotation = 0;
     if (sprite.mouse.dragging()) {
@@ -189,23 +177,15 @@ function draw() {
     text(lastMessage, width / 2, height - 150);
   }
 
-  // Draw the clickable rectangle below the total cost
-  fill('white');
+  fill("white");
   rect(buttonX, buttonY, buttonWidth, buttonHeight);
-
   fill(0);
   textSize(50);
   textAlign(CENTER, CENTER);
   text("Check Out", buttonX + buttonWidth / 2, buttonY + buttonHeight / 2);
 
-  // Check if total exceeds 20.00
-  if (totalCost > 20.00) {
+  if (totalCost > 20.0) {
     resetSprites();
-  }
-
-  // Draw the lose image on top of everything else
-  if (showLoseImageFlag) {
-    image(loseImage, 0, 0, width, height);  // Draw the lose image on top
   }
 }
 
@@ -214,9 +194,8 @@ function applyGravityAndCheckCart(sprite) {
   const rectWidth = 400;
   const rectY = 0;
   const rectHeight = height;
-  const platformY = rectHeight - 100; 
+  const platformY = rectHeight -0;
 
-  // Check if the sprite is inside the cart area
   if (
     sprite.x > rectX &&
     sprite.x < rectX + rectWidth &&
@@ -225,11 +204,9 @@ function applyGravityAndCheckCart(sprite) {
   ) {
     displayMessages(sprite);
 
-    // Apply gravity when not being dragged
     if (!sprite.mouse.dragging()) {
       sprite.y += gravityForce;
 
-      // Stop sprite at the platform
       if (sprite.y > platformY) {
         sprite.y = platformY;
         gravityForce = 3;
@@ -238,19 +215,17 @@ function applyGravityAndCheckCart(sprite) {
       }
     }
 
-    // Increase the totalCost if the item hasn't been counted yet
     if (!sprite.counted) {
       totalCost += sprite.value;
       sprite.counted = true;
       if (beepSound.isLoaded()) beepSound.play();
     }
   } else {
-    // Decrease the totalCost if the item was previously counted and is now removed
     if (sprite.counted) {
       totalCost -= sprite.value;
       sprite.counted = false;
     }
-    gravityForce = 5; // Reset gravity force
+    gravityForce = 5;
   }
 }
 
@@ -274,5 +249,15 @@ function displayMessages(sprite) {
   if (lastMessage !== message) {
     lastMessage = message;
     messageTimer = millis();
+  }
+}
+
+function showLoseImage() {
+  showLoseImageFlag = true;
+  loseImageIndex = 0; 
+
+
+  for (let sprite of sprites) {
+    sprite.visible = false;
   }
 }
