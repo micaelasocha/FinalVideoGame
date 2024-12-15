@@ -192,9 +192,9 @@ function draw() {
 function applyGravityAndCheckCart(sprite) {
   const rectX = width - 460;
   const rectWidth = 400;
-  const rectY = 0;
+  const rectY = 100;
   const rectHeight = height;
-  const platformY = rectHeight -0;
+  const platformY = rectHeight -110;
 
   if (
     sprite.x > rectX &&
